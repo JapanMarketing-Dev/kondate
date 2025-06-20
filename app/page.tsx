@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { ANALYSIS_PATTERNS, type AnalysisData } from '@/lib/regression'
 
 interface Menu {
   id: string
@@ -11,6 +12,11 @@ interface Menu {
   rice: string | null
   category: string
   description: string | null
+  rating?: number | null
+  calories?: number | null
+  cookingTime?: number | null
+  nutritionScore?: number | null
+  cost?: number | null
   createdAt: string
   updatedAt: string
 }
@@ -22,6 +28,9 @@ export default function Home() {
   const [showForm, setShowForm] = useState(false)
   const [showImageUpload, setShowImageUpload] = useState(false)
   const [uploadingImage, setUploadingImage] = useState(false)
+  const [showAnalysis, setShowAnalysis] = useState(false)
+  const [analysisData, setAnalysisData] = useState<AnalysisData[]>([])
+  const [loadingAnalysis, setLoadingAnalysis] = useState(false)
   
   // フォーム用のstate
   const [formData, setFormData] = useState({
@@ -31,7 +40,12 @@ export default function Home() {
     soup: '',
     rice: '',
     category: '和食',
-    description: ''
+    description: '',
+    rating: 3,
+    calories: 500,
+    cookingTime: 30,
+    nutritionScore: 5,
+    cost: 600
   })
 
   // 今日の献立を取得
@@ -84,7 +98,12 @@ export default function Home() {
           soup: '',
           rice: '',
           category: '和食',
-          description: ''
+          description: '',
+          rating: 3,
+          calories: 500,
+          cookingTime: 30,
+          nutritionScore: 5,
+          cost: 600
         })
         setShowForm(false)
         fetchMenus() // 一覧を再取得
@@ -119,7 +138,13 @@ export default function Home() {
           soup: data.menu.soup || '',
           rice: data.menu.rice || '',
           category: data.menu.category || '和食',
-          description: data.menu.description || ''
+          description: data.menu.description || '',
+          // 画像から推定される値もセット
+          rating: 4.0, // デフォルト値
+          calories: 550, // 一般的な値
+          cookingTime: 30,
+          nutritionScore: 7.0,
+          cost: 650
         }))
         setShowImageUpload(false)
         setShowForm(true)
@@ -140,6 +165,48 @@ export default function Home() {
     const file = e.target.files?.[0]
     if (file) {
       extractFromImage(file)
+    }
+  }
+
+  // 単回帰分析を実行
+  const runAnalysis = async () => {
+    setLoadingAnalysis(true)
+    try {
+      const response = await fetch('/api/analysis/regression')
+      const data = await response.json()
+      if (data.success) {
+        setAnalysisData(data.analyses)
+      } else {
+        alert(data.error || '分析の実行に失敗しました')
+      }
+    } catch (error) {
+      console.error('Error running analysis:', error)
+      alert('分析の実行に失敗しました')
+    } finally {
+      setLoadingAnalysis(false)
+    }
+  }
+
+  // サンプルデータを生成
+  const generateSampleData = async () => {
+    try {
+      const response = await fetch('/api/analysis/regression', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ generateSampleData: true }),
+      })
+      const data = await response.json()
+      if (data.success) {
+        alert(data.message)
+        fetchMenus() // 一覧を再取得
+      } else {
+        alert(data.error || 'サンプルデータの生成に失敗しました')
+      }
+    } catch (error) {
+      console.error('Error generating sample data:', error)
+      alert('サンプルデータの生成に失敗しました')
     }
   }
 
@@ -369,16 +436,71 @@ export default function Home() {
                 </div>
               </div>
 
-              <div>
-                <label className="block text-lg font-semibold text-gray-900 mb-2">📝 説明</label>
-                <textarea
-                  value={formData.description}
-                  onChange={(e) => setFormData({...formData, description: e.target.value})}
-                  className="w-full border-2 border-gray-300 rounded-xl px-4 py-3 text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-300"
-                  rows={4}
-                  placeholder="献立の詳細や調理のポイントなど"
-                />
-              </div>
+                             <div>
+                 <label className="block text-lg font-semibold text-gray-900 mb-2">📝 説明</label>
+                 <textarea
+                   value={formData.description}
+                   onChange={(e) => setFormData({...formData, description: e.target.value})}
+                   className="w-full border-2 border-gray-300 rounded-xl px-4 py-3 text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-300"
+                   rows={4}
+                   placeholder="献立の詳細や調理のポイントなど"
+                 />
+               </div>
+
+               {/* 分析用フィールド */}
+               <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-4 p-4 bg-blue-50 rounded-xl">
+                 <div>
+                   <label className="block text-sm font-semibold text-gray-900 mb-1">⭐ 満足度 (1-5)</label>
+                   <input
+                     type="number"
+                     min="1"
+                     max="5"
+                     step="0.1"
+                     value={formData.rating}
+                     onChange={(e) => setFormData({...formData, rating: Number(e.target.value)})}
+                     className="w-full border-2 border-gray-300 rounded-lg px-3 py-2 text-gray-900 focus:border-blue-500"
+                   />
+                 </div>
+                 <div>
+                   <label className="block text-sm font-semibold text-gray-900 mb-1">🔥 カロリー</label>
+                   <input
+                     type="number"
+                     value={formData.calories}
+                     onChange={(e) => setFormData({...formData, calories: Number(e.target.value)})}
+                     className="w-full border-2 border-gray-300 rounded-lg px-3 py-2 text-gray-900 focus:border-blue-500"
+                   />
+                 </div>
+                 <div>
+                   <label className="block text-sm font-semibold text-gray-900 mb-1">⏱️ 調理時間（分）</label>
+                   <input
+                     type="number"
+                     value={formData.cookingTime}
+                     onChange={(e) => setFormData({...formData, cookingTime: Number(e.target.value)})}
+                     className="w-full border-2 border-gray-300 rounded-lg px-3 py-2 text-gray-900 focus:border-blue-500"
+                   />
+                 </div>
+                 <div>
+                   <label className="block text-sm font-semibold text-gray-900 mb-1">🥗 栄養スコア (1-10)</label>
+                   <input
+                     type="number"
+                     min="1"
+                     max="10"
+                     step="0.1"
+                     value={formData.nutritionScore}
+                     onChange={(e) => setFormData({...formData, nutritionScore: Number(e.target.value)})}
+                     className="w-full border-2 border-gray-300 rounded-lg px-3 py-2 text-gray-900 focus:border-blue-500"
+                   />
+                 </div>
+                 <div>
+                   <label className="block text-sm font-semibold text-gray-900 mb-1">💰 費用（円）</label>
+                   <input
+                     type="number"
+                     value={formData.cost}
+                     onChange={(e) => setFormData({...formData, cost: Number(e.target.value)})}
+                     className="w-full border-2 border-gray-300 rounded-lg px-3 py-2 text-gray-900 focus:border-blue-500"
+                   />
+                 </div>
+               </div>
 
               <button
                 type="submit"
@@ -459,8 +581,116 @@ export default function Home() {
               <p className="text-gray-700 mt-2">最初の献立を登録してみましょう！</p>
             </div>
           )}
-        </section>
-      </div>
-    </div>
-  )
+                 </section>
+
+         {/* 単回帰分析セクション */}
+         <section className="bg-white rounded-2xl shadow-xl p-8 animate-fade-in-up">
+           <div className="flex justify-between items-center mb-6">
+             <h2 className="text-3xl font-bold text-gray-900 flex items-center">
+               <span className="mr-3">📊</span>
+               単回帰分析
+             </h2>
+             <div className="flex gap-3">
+               <button
+                 onClick={generateSampleData}
+                 className="bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white px-4 py-2 rounded-full text-sm font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
+               >
+                 📋 サンプルデータ生成
+               </button>
+               <button
+                 onClick={() => setShowAnalysis(!showAnalysis)}
+                 className="bg-gradient-to-r from-blue-500 to-cyan-600 hover:from-blue-600 hover:to-cyan-700 text-white px-6 py-3 rounded-full font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
+               >
+                 {showAnalysis ? '📊 分析を閉じる' : '📈 分析を開始'}
+               </button>
+             </div>
+           </div>
+
+           <div className="mb-6 p-4 bg-yellow-50 rounded-xl border-l-4 border-yellow-400">
+             <p className="text-gray-900 text-sm">
+               <strong>📚 単回帰分析とは:</strong> 
+               2つの変数間の関係を数学的に分析し、一方から他方を予測する手法です。
+               献立データの相関関係や傾向を発見できます。
+             </p>
+           </div>
+
+           {showAnalysis && (
+             <div className="animate-fade-in">
+               <div className="flex justify-center mb-6">
+                 <button
+                   onClick={runAnalysis}
+                   disabled={loadingAnalysis}
+                   className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white px-8 py-3 rounded-full font-bold text-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl disabled:opacity-50"
+                 >
+                   {loadingAnalysis ? (
+                     <div className="flex items-center">
+                       <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                       分析実行中...
+                     </div>
+                   ) : (
+                     '🚀 分析実行'
+                   )}
+                 </button>
+               </div>
+
+               {analysisData.length > 0 && (
+                 <div className="space-y-6">
+                   {analysisData.map((analysis, index) => (
+                     <div key={index} className="bg-gray-50 rounded-xl p-6 border-2 border-gray-200">
+                       <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                         <span className="mr-2">📈</span>
+                         {analysis.xLabel} × {analysis.yLabel}
+                       </h3>
+                       
+                       <div className="grid md:grid-cols-2 gap-6">
+                         <div className="space-y-3">
+                           <div className="bg-white p-4 rounded-lg">
+                             <h4 className="font-semibold text-gray-900 mb-2">📋 分析結果</h4>
+                             <div className="space-y-2 text-sm">
+                               <div><strong>回帰式:</strong> <code className="bg-gray-100 px-2 py-1 rounded">{analysis.regression.equation}</code></div>
+                               <div><strong>相関係数:</strong> <span className={`font-semibold ${Math.abs(analysis.regression.correlation) > 0.5 ? 'text-green-600' : 'text-orange-600'}`}>{analysis.regression.correlation.toFixed(4)}</span></div>
+                               <div><strong>決定係数 (R²):</strong> <span className="font-semibold">{analysis.regression.rSquared.toFixed(4)}</span></div>
+                               <div><strong>傾き:</strong> {analysis.regression.slope.toFixed(4)}</div>
+                               <div><strong>切片:</strong> {analysis.regression.intercept.toFixed(4)}</div>
+                             </div>
+                           </div>
+                           
+                           <div className="bg-white p-4 rounded-lg">
+                             <h4 className="font-semibold text-gray-900 mb-2">💭 解釈</h4>
+                             <p className="text-gray-900 text-sm">{analysis.regression.summary}</p>
+                           </div>
+                         </div>
+
+                         <div className="bg-white p-4 rounded-lg">
+                           <h4 className="font-semibold text-gray-900 mb-3">📊 データポイント ({analysis.data.length}件)</h4>
+                           <div className="grid grid-cols-2 gap-4 max-h-40 overflow-y-auto">
+                             {analysis.data.map((point, pointIndex) => (
+                               <div key={pointIndex} className="text-xs p-2 bg-gray-50 rounded">
+                                 <div><strong>X:</strong> {point.x}</div>
+                                 <div><strong>Y:</strong> {point.y}</div>
+                               </div>
+                             ))}
+                           </div>
+                         </div>
+                       </div>
+                     </div>
+                   ))}
+                 </div>
+               )}
+
+               {analysisData.length === 0 && !loadingAnalysis && (
+                 <div className="text-center py-8">
+                   <div className="text-4xl mb-3">📊</div>
+                   <p className="text-gray-700">分析を実行すると結果がここに表示されます</p>
+                   <p className="text-gray-600 text-sm mt-2">
+                     十分なデータがない場合は「サンプルデータ生成」ボタンでテストデータを作成できます
+                   </p>
+                 </div>
+               )}
+             </div>
+           )}
+         </section>
+       </div>
+     </div>
+   )
 }

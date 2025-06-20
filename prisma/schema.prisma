@@ -19,6 +19,14 @@ model Menu {
   rice        String?
   category    String   @default("和食")
   description String?
+  
+  // 単回帰分析用のフィールド
+  rating      Float?   @default(0)      // 満足度評価 (1-5)
+  calories    Int?     @default(0)      // 総カロリー
+  cookingTime Int?     @default(30)     // 調理時間（分）
+  nutritionScore Float? @default(0)     // 栄養バランススコア (1-10)
+  cost        Int?     @default(500)    // 推定費用（円）
+  
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 

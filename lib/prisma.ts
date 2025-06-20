@@ -18,9 +18,21 @@ try {
         findMany: async () => [],
         create: async (data: any) => ({ 
           id: 'mock-id', 
-          ...data.data, 
+          date: new Date(),
+          mainDish: 'Sample Dish',
+          sideDish: null,
+          soup: null,
+          rice: null,
+          category: '和食',
+          description: null,
+          rating: 0,
+          calories: 0,
+          cookingTime: 30,
+          nutritionScore: 0,
+          cost: 500,
           createdAt: new Date(),
-          updatedAt: new Date()
+          updatedAt: new Date(),
+          ...data.data
         }),
       }
     } as any
