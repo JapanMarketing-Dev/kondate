@@ -1,0 +1,14 @@
+{
+  "buildCommand": "npm run build && echo 'Skipping Prisma generate for SQLite compatibility'",
+  "functions": {
+    "app/api/**/*.ts": {
+      "maxDuration": 30
+    }
+  },
+  "env": {
+    "DATABASE_URL": {
+      "@type": "system",
+      "@value": "file:./dev.db"
+    }
+  }
+} 
