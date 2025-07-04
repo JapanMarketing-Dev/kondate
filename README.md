@@ -133,3 +133,165 @@ MIT License
 - OpenAI APIの使用には料金が発生する場合があります
 - APIキーは絶対に公開リポジトリにコミットしないでください
 - `.env`ファイルは`.gitignore`に含まれています
+
+# Chat API Test Application
+
+指定されたチャットAPIを実行するNext.jsアプリケーションです。
+
+## 📋 概要
+
+このアプリケーションは、以下のAPIエンドポイントに対してメッセージを送信する機能を提供します：
+
+- **API URL**: `https://xrvp-5l6a-rpaf.t7.xano.io/api:z1PY1HTu/chat`
+- **メソッド**: POST
+- **Content-Type**: application/json
+
+## 🚀 使用方法
+
+### 1. 依存関係のインストール
+
+```bash
+npm install
+```
+
+### 2. アプリケーションの起動
+
+```bash
+npm run dev
+```
+
+### 3. アプリケーションの使用
+
+#### Web UI（推奨）
+1. ブラウザで `http://localhost:3000/chat-test` を開く
+2. フォームに値を入力してメッセージを送信
+3. レスポンスが画面に表示される
+
+#### APIエンドポイント直接呼び出し
+
+**テストメッセージ送信 (GET)**
+```bash
+curl http://localhost:3000/api/chat
+```
+
+**カスタムメッセージ送信 (POST)**
+```bash
+curl -X POST http://localhost:3000/api/chat \
+  -H "Content-Type: application/json" \
+  -d '{"text":"Hello","channel":"test","user":"user1","mention":"@all","date":"2024-01-01T00:00:00.000Z"}'
+```
+
+#### テストスクリプト実行
+```bash
+node test/api-test.js
+```
+
+## 📁 ファイル構成
+
+```
+├── app/
+│   ├── api/
+│   │   └── chat/
+│   │       └── route.ts        # APIルートハンドラー
+│   └── chat-test/
+│       └── page.tsx            # UIテストページ
+├── lib/
+│   └── chatApi.ts              # APIクライアント
+├── test/
+│   └── api-test.js             # テストスクリプト
+└── README.md                   # このファイル
+```
+
+## ✅ テスト結果
+
+すべてのテストが正常に実行され、以下の機能が確認されています：
+
+1. **GETリクエストテスト** - テストメッセージの送信 ✅
+2. **POSTリクエストテスト** - カスタムメッセージの送信 ✅
+3. **並列送信テスト** - 複数メッセージの同時送信 ✅
+4. **エラーハンドリング** - 無効なデータの処理 ✅
+5. **UIページテスト** - ブラウザインターフェース ✅
+
+## 🔧 技術スタック
+
+- **Next.js 15** - React フレームワーク
+- **TypeScript** - 型安全なJavaScript
+- **Tailwind CSS** - UIスタイリング
+- **Fetch API** - HTTP クライアント
+
+## 📊 API レスポンス例
+
+```json
+{
+  "id": 231,
+  "created_at": 1751608647268,
+  "text": "1",
+  "channel": "2",
+  "user": "3",
+  "mention": "4",
+  "date": "5"
+}
+```
+
+## 🎯 主な機能
+
+1. **APIクライアント** (`lib/chatApi.ts`)
+   - 外部APIとの通信を担当
+   - エラーハンドリング機能付き
+
+2. **APIルート** (`app/api/chat/route.ts`)
+   - GET/POSTリクエストの処理
+   - サーバーサイドでのAPI呼び出し
+
+3. **UIテストページ** (`app/chat-test/page.tsx`)
+   - ブラウザベースのテストインターフェース
+   - リアルタイムでのレスポンス表示
+
+4. **テストスクリプト** (`test/api-test.js`)
+   - 自動テストの実行
+   - 包括的なテストケース
+
+## 🌐 アクセス方法
+
+アプリケーション起動後、以下のURLでアクセスできます：
+
+- **UIテストページ**: http://localhost:3000/chat-test
+- **API GET**: http://localhost:3000/api/chat
+- **API POST**: http://localhost:3000/api/chat
+
+---
+
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+
+## Getting Started
+
+First, run the development server:
+
+```bash
+npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+
+## Learn More
+
+To learn more about Next.js, take a look at the following resources:
+
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+
+## Deploy on Vercel
+
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
