@@ -178,7 +178,7 @@ curl http://localhost:3000/api/chat
 ```bash
 curl -X POST http://localhost:3000/api/chat \
   -H "Content-Type: application/json" \
-  -d '{"text":"Hello","channel":"test","user":"user1","mention":"@all","date":"2024-01-01T00:00:00.000Z"}'
+  -d '{"text":"こんにちは！これはテストメッセージです。","channel":"general","user":"demo_user","mention":"@everyone","date":"2024-01-01T12:00:00.000Z"}'
 ```
 
 #### テストスクリプト実行
@@ -223,13 +223,13 @@ node test/api-test.js
 
 ```json
 {
-  "id": 231,
-  "created_at": 1751608647268,
-  "text": "1",
-  "channel": "2",
-  "user": "3",
-  "mention": "4",
-  "date": "5"
+  "id": 239,
+  "created_at": 1751608957870,
+  "text": "こんにちは！これはテストメッセージです。",
+  "channel": "general",
+  "user": "demo_user",
+  "mention": "@everyone",
+  "date": "2025-07-04T06:02:37.576Z"
 }
 ```
 

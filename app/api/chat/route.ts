@@ -5,11 +5,11 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const message: ChatMessage = {
-      text: body.text || "1",
-      channel: body.channel || "2",
-      user: body.user || "3",
-      mention: body.mention || "4",
-      date: body.date || "5"
+      text: body.text || "こんにちは！これはサンプルメッセージです。",
+      channel: body.channel || "general",
+      user: body.user || "demo_user",
+      mention: body.mention || "@everyone",
+      date: body.date || new Date().toISOString()
     };
 
     const result = await chatApiClient.sendMessage(message);
@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
 
 export async function GET() {
   try {
-    // テスト用のデフォルトメッセージを送信
+    // デモ用のテストメッセージを送信
     const result = await chatApiClient.sendTestMessage();
     
     if (result.success) {

@@ -5,11 +5,11 @@ import { ChatMessage, ChatAPIResponse } from '@/lib/chatApi';
 
 export default function ChatTestPage() {
   const [message, setMessage] = useState<ChatMessage>({
-    text: "1",
-    channel: "2",
-    user: "3",
-    mention: "4",
-    date: "5"
+    text: "こんにちは！これはサンプルメッセージです。",
+    channel: "general",
+    user: "demo_user",
+    mention: "@everyone",
+    date: new Date().toISOString()
   });
   const [response, setResponse] = useState<any>(null);
   const [loading, setLoading] = useState(false);
@@ -79,6 +79,16 @@ export default function ChatTestPage() {
     handleInputChange('date', now);
   };
 
+  const loadDemoData = () => {
+    setMessage({
+      text: "今日は素晴らしい一日ですね！",
+      channel: "雑談",
+      user: "田中太郎",
+      mention: "@チーム",
+      date: new Date().toISOString()
+    });
+  };
+
   return (
     <div className="max-w-4xl mx-auto p-6 bg-white">
       <h1 className="text-3xl font-bold mb-6 text-gray-800">チャットAPI テスト</h1>
@@ -91,12 +101,12 @@ export default function ChatTestPage() {
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-600 mb-1">Text</label>
-              <input
-                type="text"
+              <textarea
                 value={message.text}
                 onChange={(e) => handleInputChange('text', e.target.value)}
                 className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="メッセージテキスト"
+                rows={3}
               />
             </div>
 
@@ -169,6 +179,13 @@ export default function ChatTestPage() {
             >
               {loading ? '送信中...' : 'テストメッセージ送信'}
             </button>
+            
+            <button
+              onClick={loadDemoData}
+              className="px-4 py-2 bg-purple-500 text-white rounded-md hover:bg-purple-600 transition-colors"
+            >
+              デモデータ読み込み
+            </button>
           </div>
         </div>
 
@@ -217,11 +234,11 @@ export default function ChatTestPage() {
           <p><strong>ペイロード例:</strong></p>
           <pre className="bg-gray-100 p-2 rounded text-xs overflow-x-auto">
 {`{
-  "text": "1",
-  "channel": "2", 
-  "user": "3",
-  "mention": "4",
-  "date": "5"
+  "text": "こんにちは！これはサンプルメッセージです。",
+  "channel": "general",
+  "user": "demo_user",
+  "mention": "@everyone",
+  "date": "2024-01-01T12:00:00.000Z"
 }`}
           </pre>
         </div>

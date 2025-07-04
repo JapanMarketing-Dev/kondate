@@ -48,12 +48,13 @@ export class ChatAPIClient {
   }
 
   async sendTestMessage(): Promise<ChatAPIResponse> {
+    const now = new Date().toISOString();
     return this.sendMessage({
-      text: "1",
-      channel: "2",
-      user: "3",
-      mention: "4",
-      date: "5",
+      text: "こんにちは！これはテストメッセージです。",
+      channel: "general",
+      user: "demo_user",
+      mention: "@everyone",
+      date: now,
     });
   }
 }

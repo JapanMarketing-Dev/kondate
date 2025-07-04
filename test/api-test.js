@@ -8,7 +8,7 @@ async function testAPI() {
   console.log('🚀 チャットAPI テストを開始します...\n');
   
   // Test 1: GETリクエストでテストメッセージを送信
-  console.log('1. GETリクエストテスト (テストメッセージ送信)');
+  console.log('1. GETリクエストテスト (デモテストメッセージ送信)');
   try {
     const response = await fetch(`${TEST_BASE_URL}/api/chat`);
     const data = await response.json();
@@ -27,10 +27,10 @@ async function testAPI() {
   console.log('2. POSTリクエストテスト (カスタムメッセージ送信)');
   try {
     const customMessage = {
-      text: `JavaScript Test Message - ${new Date().toISOString()}`,
-      channel: 'test-channel',
-      user: 'test-user',
-      mention: '@everyone',
+      text: `おはようございます！APIテストを実行中です。時刻: ${new Date().toLocaleString('ja-JP')}`,
+      channel: 'テストチャンネル',
+      user: 'テストユーザー',
+      mention: '@開発チーム',
       date: new Date().toISOString()
     };
     
@@ -57,27 +57,39 @@ async function testAPI() {
   // Test 3: 複数のメッセージを並列で送信
   console.log('3. 複数メッセージ並列送信テスト');
   try {
-    const promises = [];
-    
-    for (let i = 1; i <= 3; i++) {
-      const message = {
-        text: `Parallel Test Message ${i}`,
-        channel: `channel-${i}`,
-        user: `user-${i}`,
-        mention: `@user-${i}`,
+    const messages = [
+      {
+        text: '今日の天気は晴れです☀️',
+        channel: '天気情報',
+        user: '気象Bot',
+        mention: '@全員',
         date: new Date().toISOString()
-      };
-      
-      promises.push(
-        fetch(`${TEST_BASE_URL}/api/chat`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(message)
-        })
-      );
-    }
+      },
+      {
+        text: '新しい機能をリリースしました！',
+        channel: 'お知らせ',
+        user: '開発チーム',
+        mention: '@プロジェクトメンバー',
+        date: new Date().toISOString()
+      },
+      {
+        text: 'コーヒーブレイクの時間です☕',
+        channel: '休憩室',
+        user: '管理者',
+        mention: '@カフェ好き',
+        date: new Date().toISOString()
+      }
+    ];
+    
+    const promises = messages.map(message => 
+      fetch(`${TEST_BASE_URL}/api/chat`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(message)
+      })
+    );
     
     const responses = await Promise.all(promises);
     const results = await Promise.all(responses.map(r => r.json()));
@@ -117,10 +129,41 @@ async function testAPI() {
   }
   console.log('');
   
+  // Test 5: 日本語メッセージのテスト
+  console.log('5. 日本語メッセージテスト');
+  try {
+    const japaneseMessage = {
+      text: 'こんにちは！これは日本語のテストメッセージです。絵文字も使えます 🎉',
+      channel: '日本語チャンネル',
+      user: '日本のユーザー',
+      mention: '@日本語チーム',
+      date: new Date().toISOString()
+    };
+    
+    const response = await fetch(`${TEST_BASE_URL}/api/chat`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(japaneseMessage)
+    });
+    
+    const data = await response.json();
+    
+    if (response.ok) {
+      console.log('   ✅ 成功:', data);
+    } else {
+      console.log('   ❌ エラー:', data);
+    }
+  } catch (error) {
+    console.log('   ❌ 例外:', error.message);
+  }
+  console.log('');
+  
   console.log('🎉 テスト完了！');
   
   // UIページのテスト
-  console.log('\n5. UIページテスト');
+  console.log('\n6. UIページテスト');
   try {
     const response = await fetch(`${TEST_BASE_URL}/chat-test`);
     
